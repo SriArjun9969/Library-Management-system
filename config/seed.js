@@ -19,14 +19,14 @@ const seedData = async () => {
 
   console.log('🗑️  Cleared existing data');
 
-  // Create Users
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  // Create Users (password will be hashed by the pre-save hook)
+  const adminPassword = await bcrypt.hash('password123', 10);
 
   const users = await User.insertMany([
     {
       name: 'Admin User',
       email: 'admin@library.com',
-      password: hashedPassword,
+      password: adminPassword,
       role: 'admin',
       phone: '1234567890',
       address: '123 Admin Street',
@@ -34,25 +34,25 @@ const seedData = async () => {
     {
       name: 'John Student',
       email: 'john@student.com',
-      password: hashedPassword,
+      password: adminPassword,
       role: 'user',
       phone: '9876543210',
       address: '456 Student Ave',
-      membershipId: 'MEM001',
+      membershipId: 'MEM0001',
     },
     {
       name: 'Jane Doe',
       email: 'jane@student.com',
-      password: hashedPassword,
+      password: adminPassword,
       role: 'user',
       phone: '5551234567',
       address: '789 Library Road',
-      membershipId: 'MEM002',
+      membershipId: 'MEM0002',
     },
     {
       name: 'Librarian Bob',
       email: 'bob@library.com',
-      password: hashedPassword,
+      password: adminPassword,
       role: 'librarian',
       phone: '4449876543',
       address: '321 Library Lane',
@@ -203,37 +203,80 @@ const seedData = async () => {
       pages: 212,
       location: 'Shelf F-1',
     },
+    {
+      title: 'The 7 Habits of Highly Effective People',
+      author: 'Stephen R. Covey',
+      isbn: '9780743269513',
+      category: 'Self-Help',
+      quantity: 5,
+      availableCopies: 5,
+      publishedYear: 1989,
+      description: 'Powerful lessons in personal change.',
+      publisher: 'Free Press',
+      language: 'English',
+      pages: 381,
+      location: 'Shelf E-2',
+    },
+    {
+      title: 'Rich Dad Poor Dad',
+      author: 'Robert T. Kiyosaki',
+      isbn: '9781612680194',
+      category: 'Business',
+      quantity: 6,
+      availableCopies: 6,
+      publishedYear: 1997,
+      description: 'What the rich teach their kids about money.',
+      publisher: 'Plata Publishing',
+      language: 'English',
+      pages: 336,
+      location: 'Shelf G-1',
+    },
   ]);
 
   console.log('📚 Books seeded');
 
-  // Create a sample issued book (overdue)
+  // Create sample issued books
   const overdueDate = new Date();
   overdueDate.setDate(overdueDate.getDate() - 20); // 20 days ago
 
   const dueDate = new Date(overdueDate);
-  dueDate.setDate(dueDate.getDate() + 14); // Due 14 days from issue
+  dueDate.setDate(dueDate.getDate() + 14); // Due 14 days from issue (now overdue)
 
   await IssuedBook.create({
     book: books[0]._id,
     user: users[1]._id,
     issueDate: overdueDate,
     dueDate: dueDate,
-    status: 'issued',
+    status: 'overdue',
     issuedBy: users[0]._id,
   });
 
-  // Update available copies for the issued book
   await Book.findByIdAndUpdate(books[0]._id, { $inc: { availableCopies: -1 } });
 
-  console.log('📋 Sample issued book created (overdue)');
+  // Create a currently issued book (not overdue)
+  const recentIssueDate = new Date();
+  recentIssueDate.setDate(recentIssueDate.getDate() - 3); // 3 days ago
+  const recentDueDate = new Date(recentIssueDate);
+  recentDueDate.setDate(recentDueDate.getDate() + 14);
 
+  await IssuedBook.create({
+    book: books[2]._id,
+    user: users[2]._id,
+    issueDate: recentIssueDate,
+    dueDate: recentDueDate,
+    status: 'issued',
+    issuedBy: users[3]._id,
+  });
+
+  await Book.findByIdAndUpdate(books[2]._id, { $inc: { availableCopies: -1 } });
+
+  console.log('📋 Sample issued books created');
   console.log('\n✅ Database seeded successfully!');
   console.log('\n📧 Sample Login Credentials:');
-  console.log('   Admin:     admin@library.com     / password123');
-  console.log('   Librarian: bob@library.com       / password123');
-  console.log('   User:      john@student.com      / password123');
-  console.log('   User:      jane@student.com      / password123');
+  console.log('   Admin:     admin@library.com  / password123');
+  console.log('   Librarian: bob@library.com    / password123');
+  console.log('   User:      john@student.com   / password123');
+  console.log('   User:      jane@student.com   / password123');
 
   process.exit(0);
 };

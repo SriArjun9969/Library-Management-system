@@ -1,12 +1,12 @@
-// middleware/auth.js - JWT authentication and role-based authorization
+// middleware/auth.js - JWT authentication and role-based authorization middleware
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Protect routes - verify JWT token
-exports.protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
 
-  // Check for token in Authorization header or cookie
+  // Check Authorization header
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }
@@ -22,20 +22,20 @@ exports.protect = async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Attach user to request
-    req.user = await User.findById(decoded.id);
+    // Attach user to request object
+    req.user = await User.findById(decoded.id).select('-password');
 
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'User not found. Token invalid.',
+        message: 'User not found. Token is invalid.',
       });
     }
 
     if (!req.user.isActive) {
       return res.status(401).json({
         success: false,
-        message: 'Account is deactivated. Contact admin.',
+        message: 'Account has been deactivated. Contact admin.',
       });
     }
 
@@ -49,14 +49,16 @@ exports.protect = async (req, res, next) => {
 };
 
 // Authorize specific roles
-exports.authorize = (...roles) => {
+const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Role '${req.user.role}' is not authorized for this action.`,
+        message: `Role '${req.user.role}' is not authorized to access this route.`,
       });
     }
     next();
   };
 };
+
+module.exports = { protect, authorize };

@@ -1,8 +1,8 @@
-// models/User.js - User schema definition
+// models/User.js - User schema with roles and authentication fields
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -22,7 +22,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters'],
-      select: false, // Don't return password in queries by default
+      select: false, // Don't return password by default
     },
     role: {
       type: String,
@@ -40,39 +40,45 @@ const UserSchema = new mongoose.Schema(
     membershipId: {
       type: String,
       unique: true,
-      sparse: true, // Allow multiple null values
-    },
-    membershipExpiry: {
-      type: Date,
-      default: () => {
-        const d = new Date();
-        d.setFullYear(d.getFullYear() + 1);
-        return d;
-      },
+      sparse: true, // Allow null values to not conflict with unique
     },
     isActive: {
       type: Boolean,
       default: true,
     },
-    totalFine: {
+    avatar: {
+      type: String,
+      default: '',
+    },
+    totalBooksIssued: {
+      type: Number,
+      default: 0,
+    },
+    totalFinesPaid: {
       type: Number,
       default: 0,
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 
 // Hash password before saving
-UserSchema.pre('save', async function (next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Auto-generate membership ID for regular users
-UserSchema.pre('save', async function (next) {
+// Method to compare passwords
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Auto-generate membershipId for regular users
+userSchema.pre('save', async function (next) {
   if (this.role === 'user' && !this.membershipId) {
     const count = await mongoose.model('User').countDocuments({ role: 'user' });
     this.membershipId = `MEM${String(count + 1).padStart(4, '0')}`;
@@ -80,9 +86,4 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Method to compare passwords
-UserSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
-};
-
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);

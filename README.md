@@ -1,143 +1,148 @@
-# 📚 Library Management System
+# 📚 LibraryOS — Library Management System
 
-A full-stack web application for managing library operations with role-based access control, JWT authentication, and a modern responsive UI.
-
----
-
-## 🚀 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | HTML5, CSS3, Vanilla JavaScript (Responsive) |
-| Backend | Node.js + Express.js |
-| Database | MongoDB + Mongoose ODM |
-| Auth | JWT + bcryptjs |
-| Validation | express-validator |
+A complete full-stack Library Management System built with **Node.js**, **Express**, **MongoDB**, and a modern dark-themed frontend using **HTML5 / CSS3 / Vanilla JS**.
 
 ---
 
-## ✨ Features
+## 🌟 Features
 
-### 👤 User Roles
-- **Admin** — Full system access
-- **Librarian** — Book & issue management
-- **Student/User** — Browse, request, return books
+### Authentication & Roles
+- JWT-based login & registration
+- Password hashing with bcrypt
+- Three roles: **Admin**, **Librarian**, **Student/User**
+- Role-based access control on all routes
 
-### 🔐 Authentication
-- Registration & Login with password hashing (bcrypt)
-- JWT-based stateless authentication
-- Role-based route authorization middleware
+### Admin Features
+- Add, edit, delete books
+- View & manage all library members
+- Issue books to members
+- Process returns & calculate fines
+- View overdue books with fine details
+- Dashboard with real-time statistics
+- Activate/deactivate user accounts
 
-### 📖 Book Management
-- Add, edit, delete (soft-delete) books
+### Librarian Features
+- Add & edit books
+- Issue and return books
+- View all issued & overdue books
+
+### Student/User Features
+- Register & login
+- Browse all books with search & filters
+- View book details
+- See personal borrowing history
+- Track overdue status & fines
+
+### Book Management
+- Full CRUD operations
+- Category-based filtering
+- Full-text search (title, author, ISBN)
 - Auto-update available copies on issue/return
-- Search by title, author, or ISBN
-- Filter by category and availability
-- Pagination for book listing
+- Pagination
 
-### 📋 Issue / Return
-- Issue books to users (with 14-day default due date)
-- Return processing with automatic fine calculation
-- Maximum 3 active books per user
-- Overdue tracking and fine calculation ($5/day default)
-
-### 🛠 Admin Features
-- Dashboard with live statistics
-- View all issued and overdue books
-- Manage users (activate/deactivate)
-- Full CRUD for books
+### Fine System
+- Configurable fine per day (default: ₹5/day)
+- Configurable loan period (default: 14 days)
+- Fine tracking — paid/unpaid status
 
 ---
 
-## 📁 Folder Structure
+## 🛠️ Tech Stack
+
+| Layer      | Technology                     |
+|------------|--------------------------------|
+| Backend    | Node.js + Express.js           |
+| Database   | MongoDB + Mongoose ODM         |
+| Auth       | JWT + bcryptjs                 |
+| Validation | express-validator              |
+| Frontend   | HTML5 + CSS3 + Vanilla JS      |
+| Fonts      | Syne + DM Sans (Google Fonts)  |
+
+---
+
+## 📁 Project Structure
 
 ```
 library-management-system/
 ├── config/
-│   ├── db.js              # MongoDB connection
-│   └── seed.js            # Sample data seeder
+│   ├── db.js           # MongoDB connection
+│   └── seed.js         # Sample data seeder
 ├── controllers/
-│   ├── authController.js  # Login, register, profile
-│   ├── bookController.js  # Book CRUD
-│   ├── issueController.js # Issue & return logic
-│   └── userController.js  # User management
+│   ├── authController.js
+│   ├── bookController.js
+│   ├── issuedBookController.js
+│   └── userController.js
 ├── middleware/
-│   ├── auth.js            # JWT protect + authorize
-│   ├── errorHandler.js    # Global error handler
-│   └── validate.js        # express-validator rules
+│   ├── auth.js         # JWT protect + authorize
+│   ├── errorHandler.js # Global error handler
+│   └── validate.js     # Input validation rules
 ├── models/
-│   ├── User.js            # User schema
-│   ├── Book.js            # Book schema
-│   └── IssuedBook.js      # Issue record schema
+│   ├── User.js
+│   ├── Book.js
+│   └── IssuedBook.js
 ├── routes/
 │   ├── authRoutes.js
 │   ├── bookRoutes.js
-│   ├── issueRoutes.js
+│   ├── issuedBookRoutes.js
 │   └── userRoutes.js
 ├── public/
-│   ├── css/style.css      # All styles
-│   ├── js/
-│   │   ├── api.js         # API communication layer
-│   │   └── app.js         # Frontend SPA logic
-│   └── index.html         # Single-page application
-├── .env                   # Environment variables
-├── .env.example           # Template
+│   └── index.html      # Full SPA frontend
+├── .env
+├── .env.example
 ├── package.json
-└── server.js              # App entry point
+├── server.js
+└── README.md
 ```
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚡ Quick Start
 
 ### Prerequisites
-- Node.js v16+
-- MongoDB (local or MongoDB Atlas)
-- npm or yarn
+- **Node.js** v18+ ([download](https://nodejs.org))
+- **MongoDB** v6+ ([download](https://www.mongodb.com/try/download/community)) OR MongoDB Atlas (cloud)
 
-### Step 1: Clone and install
+### 1. Clone / Download
 
 ```bash
-# Navigate into the project
 cd library-management-system
+```
 
-# Install dependencies
+### 2. Install Dependencies
+
+```bash
 npm install
 ```
 
-### Step 2: Configure environment
+### 3. Configure Environment
 
 ```bash
-# Copy the example env file
 cp .env.example .env
-
-# Edit .env with your values
-nano .env
 ```
 
-**.env variables:**
+Edit `.env`:
+
 ```env
 PORT=5000
-NODE_ENV=development
 MONGO_URI=mongodb://localhost:27017/library_management
-JWT_SECRET=your_super_secret_key_here
+JWT_SECRET=your_super_secret_key_change_me
 JWT_EXPIRE=7d
 FINE_PER_DAY=5
-ISSUE_DURATION_DAYS=14
+LOAN_PERIOD_DAYS=14
 ```
 
-### Step 3: Seed the database (optional but recommended)
+> 💡 For MongoDB Atlas, use your connection string:
+> `MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/library_management`
+
+### 4. Seed Sample Data
 
 ```bash
 npm run seed
 ```
 
-This will create:
-- 4 sample users (admin, librarian, 2 students)
-- 10 sample books across categories
-- 1 sample issued book (overdue)
+This creates 4 users, 12 books, and 2 sample issue records.
 
-### Step 4: Start the server
+### 5. Start the Server
 
 ```bash
 # Development (with auto-reload)
@@ -147,7 +152,7 @@ npm run dev
 npm start
 ```
 
-### Step 5: Open in browser
+### 6. Open in Browser
 
 ```
 http://localhost:5000
@@ -155,130 +160,107 @@ http://localhost:5000
 
 ---
 
-## 🔑 Default Login Credentials
+## 🔑 Demo Credentials
 
-After seeding, use these to log in:
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@library.com | password123 |
-| Librarian | bob@library.com | password123 |
-| Student | john@student.com | password123 |
-| Student | jane@student.com | password123 |
+| Role       | Email                | Password    |
+|------------|----------------------|-------------|
+| Admin      | admin@library.com    | password123 |
+| Librarian  | bob@library.com      | password123 |
+| Student    | john@student.com     | password123 |
+| Student    | jane@student.com     | password123 |
 
 ---
 
-## 🌐 API Reference
+## 📡 REST API Reference
 
-### Auth Routes
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | /api/auth/register | Register new user | Public |
-| POST | /api/auth/login | Login | Public |
-| GET | /api/auth/me | Get current user | Private |
-| PUT | /api/auth/password | Update password | Private |
+### Authentication
+| Method | Endpoint              | Access  | Description          |
+|--------|----------------------|---------|----------------------|
+| POST   | /api/auth/register   | Public  | Register new user    |
+| POST   | /api/auth/login      | Public  | Login               |
+| GET    | /api/auth/me         | Private | Get current user    |
+| PUT    | /api/auth/profile    | Private | Update profile      |
+| PUT    | /api/auth/change-password | Private | Change password |
 
-### Books Routes
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | /api/books | Get all books (search, filter, paginate) | Public |
-| GET | /api/books/:id | Get single book | Public |
-| GET | /api/books/categories | Get all categories | Public |
-| POST | /api/books | Add a book | Admin/Librarian |
-| PUT | /api/books/:id | Update a book | Admin/Librarian |
-| DELETE | /api/books/:id | Delete a book | Admin |
+### Books
+| Method | Endpoint              | Access         | Description         |
+|--------|----------------------|----------------|---------------------|
+| GET    | /api/books           | Public         | Get all books       |
+| GET    | /api/books/:id       | Public         | Get single book     |
+| GET    | /api/books/categories| Public         | Get categories      |
+| POST   | /api/books           | Admin/Librarian| Add book            |
+| PUT    | /api/books/:id       | Admin/Librarian| Update book         |
+| DELETE | /api/books/:id       | Admin          | Delete book         |
+| GET    | /api/books/admin/stats| Admin/Librarian| Book statistics    |
 
-### Issues Routes
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | /api/issues | All issued books | Admin/Librarian |
-| GET | /api/issues/my | My issued books | Private |
-| GET | /api/issues/overdue | Overdue books | Admin/Librarian |
-| GET | /api/issues/stats | Dashboard stats | Admin/Librarian |
-| POST | /api/issues | Issue a book | Private |
-| PUT | /api/issues/:id/return | Return a book | Admin/Librarian |
+### Issued Books
+| Method | Endpoint                  | Access         | Description          |
+|--------|--------------------------|----------------|----------------------|
+| GET    | /api/issued              | Admin/Librarian| All issued books     |
+| GET    | /api/issued/overdue      | Admin/Librarian| Overdue books        |
+| GET    | /api/issued/stats        | Admin/Librarian| Dashboard stats      |
+| GET    | /api/issued/my-books     | Private        | Current user's books |
+| GET    | /api/issued/user/:userId | Admin/Librarian| User's issued books  |
+| POST   | /api/issued              | Admin/Librarian| Issue a book         |
+| PUT    | /api/issued/:id/return   | Admin/Librarian| Return a book        |
+| PUT    | /api/issued/:id/pay-fine | Admin/Librarian| Mark fine as paid    |
 
-### Users Routes
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| GET | /api/users | Get all users | Admin/Librarian |
-| GET | /api/users/:id | Get user by ID | Admin |
-| PUT | /api/users/profile | Update own profile | Private |
-| PUT | /api/users/:id | Update user | Admin |
-| PUT | /api/users/:id/toggle | Toggle active status | Admin |
-
----
-
-## 🗄️ MongoDB Schemas
-
-### User Schema
-```js
-{ name, email, password (hashed), role, phone, address, membershipId, isActive, totalFine }
-```
-
-### Book Schema
-```js
-{ title, author, isbn, category, quantity, availableCopies, publishedYear, publisher, description, language, pages, location, isActive }
-```
-
-### IssuedBook Schema
-```js
-{ book (ref), user (ref), issueDate, dueDate, returnDate, status, fine, issuedBy (ref), remarks }
-```
+### Users
+| Method | Endpoint                     | Access | Description      |
+|--------|------------------------------|--------|-----------------|
+| GET    | /api/users                   | Admin/Librarian | Get all users |
+| GET    | /api/users/:id               | Admin/Librarian | Get user      |
+| POST   | /api/users                   | Admin  | Create user     |
+| PUT    | /api/users/:id               | Admin  | Update user     |
+| PUT    | /api/users/:id/toggle-status | Admin  | Activate/deactivate |
+| DELETE | /api/users/:id               | Admin  | Delete user     |
 
 ---
 
-## 🎨 UI Pages
+## 🔍 API Query Parameters
 
-- **Login / Register** — Auth page with tabbed interface
-- **Dashboard** — Stats cards + recent activity
-- **Browse Books** — Grid with search, filter, pagination
-- **My Books** (User) — Active issues + history
-- **Manage Books** (Staff) — Table with edit/delete
-- **Issue/Return** (Staff) — Issue book form + return form
-- **Overdue Books** (Staff) — Overdue list with fine info
-- **Users** (Admin/Librarian) — User management table
+**GET /api/books**
+- `search` — Search title, author, ISBN
+- `category` — Filter by category
+- `page` — Page number (default: 1)
+- `limit` — Items per page (default: 12)
+- `sort` — Sort field (default: -createdAt)
+- `available=true` — Only show available books
 
----
+**GET /api/issued**
+- `status` — Filter: `issued`, `overdue`, `returned`
+- `page`, `limit`
 
-## 🔧 Configuration Options
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| PORT | 5000 | Server port |
-| FINE_PER_DAY | 5 | Fine amount per day overdue |
-| ISSUE_DURATION_DAYS | 14 | Default borrowing period |
-| JWT_EXPIRE | 7d | Token expiry |
+**GET /api/users**
+- `search` — Search name, email, membershipId
+- `role` — Filter: `admin`, `librarian`, `user`
+- `page`, `limit`
 
 ---
 
-## 📦 Dependencies
+## 💡 Configuration
 
-```json
-{
-  "express": "Web framework",
-  "mongoose": "MongoDB ODM",
-  "bcryptjs": "Password hashing",
-  "jsonwebtoken": "JWT authentication",
-  "express-validator": "Input validation",
-  "cors": "Cross-origin resource sharing",
-  "dotenv": "Environment variables",
-  "morgan": "HTTP request logging"
-}
-```
+| Variable       | Default | Description                |
+|---------------|---------|----------------------------|
+| PORT           | 5000    | Server port                |
+| MONGO_URI      | —       | MongoDB connection string  |
+| JWT_SECRET     | —       | JWT signing secret         |
+| JWT_EXPIRE     | 7d      | Token expiry               |
+| FINE_PER_DAY   | 5       | Fine in ₹ per overdue day  |
+| LOAN_PERIOD_DAYS | 14   | Default loan duration      |
 
 ---
 
-## 🤝 Contributing
+## 📌 Notes
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- Books are **soft deleted** (marked inactive) to preserve historical records
+- Overdue status is **auto-synced** when fetching issued books
+- Users with unpaid fines **cannot borrow** new books
+- A user **cannot borrow the same book** twice simultaneously
+- Fine is **automatically calculated** at 0 if returned on time
 
 ---
 
-## 📝 License
+## 📄 License
 
-MIT License — feel free to use for learning and personal projects.
+MIT License — Free to use for educational and personal projects.

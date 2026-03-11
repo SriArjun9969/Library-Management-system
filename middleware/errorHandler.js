@@ -1,12 +1,9 @@
-// middleware/errorHandler.js - Centralized error handling
+// middleware/errorHandler.js - Global error handling middleware
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Log error in development
-  if (process.env.NODE_ENV === 'development') {
-    console.error('❌ Error:', err);
-  }
+  console.error('Error:', err);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -23,9 +20,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
-    error.message = Object.values(err.errors)
-      .map((e) => e.message)
-      .join(', ');
+    error.message = Object.values(err.errors).map((val) => val.message).join(', ');
     return res.status(400).json({ success: false, message: error.message });
   }
 
@@ -35,7 +30,7 @@ const errorHandler = (err, req, res, next) => {
   }
 
   if (err.name === 'TokenExpiredError') {
-    return res.status(401).json({ success: false, message: 'Token expired.' });
+    return res.status(401).json({ success: false, message: 'Token has expired.' });
   }
 
   res.status(err.statusCode || 500).json({

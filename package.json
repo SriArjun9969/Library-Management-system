@@ -1,7 +1,7 @@
 {
   "name": "library-management-system",
   "version": "1.0.0",
-  "description": "A full-stack Library Management System with JWT auth and role-based access",
+  "description": "A full-stack Library Management System with JWT authentication and role-based access control",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -15,10 +15,10 @@
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.3",
+    "mongoose": "^8.0.3",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.2"
   }
 }

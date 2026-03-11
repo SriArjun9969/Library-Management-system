@@ -1,7 +1,7 @@
-// models/Book.js - Book schema definition
+// models/Book.js - Book schema with all required fields
 const mongoose = require('mongoose');
 
-const BookSchema = new mongoose.Schema(
+const bookSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -11,7 +11,7 @@ const BookSchema = new mongoose.Schema(
     },
     author: {
       type: String,
-      required: [true, 'Author is required'],
+      required: [true, 'Author name is required'],
       trim: true,
     },
     isbn: {
@@ -33,10 +33,11 @@ const BookSchema = new mongoose.Schema(
         'Self-Help',
         'Psychology',
         'Philosophy',
-        'Mathematics',
-        'Literature',
         'Arts',
-        'Reference',
+        'Mathematics',
+        'Medicine',
+        'Law',
+        'Business',
         'Other',
       ],
     },
@@ -44,23 +45,27 @@ const BookSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Quantity is required'],
       min: [0, 'Quantity cannot be negative'],
+      default: 1,
     },
     availableCopies: {
       type: Number,
       min: [0, 'Available copies cannot be negative'],
+      default: function () {
+        return this.quantity;
+      },
     },
     publishedYear: {
       type: Number,
       min: [1000, 'Invalid year'],
       max: [new Date().getFullYear(), 'Year cannot be in the future'],
     },
-    publisher: {
-      type: String,
-      trim: true,
-    },
     description: {
       type: String,
       maxlength: [1000, 'Description cannot exceed 1000 characters'],
+    },
+    publisher: {
+      type: String,
+      trim: true,
     },
     language: {
       type: String,
@@ -71,16 +76,20 @@ const BookSchema = new mongoose.Schema(
       min: [1, 'Pages must be at least 1'],
     },
     location: {
-      type: String, // Physical shelf location
-      trim: true,
+      type: String,
+      trim: true, // e.g., "Shelf A-1"
     },
     coverImage: {
       type: String,
-      default: '', // URL or path to cover image
+      default: '',
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    totalIssued: {
+      type: Number,
+      default: 0, // Track how many times this book has been issued
     },
   },
   {
@@ -88,15 +97,7 @@ const BookSchema = new mongoose.Schema(
   }
 );
 
-// Set availableCopies = quantity on creation if not specified
-BookSchema.pre('save', function (next) {
-  if (this.isNew && this.availableCopies === undefined) {
-    this.availableCopies = this.quantity;
-  }
-  next();
-});
-
 // Text index for search functionality
-BookSchema.index({ title: 'text', author: 'text', isbn: 'text' });
+bookSchema.index({ title: 'text', author: 'text', isbn: 'text' });
 
-module.exports = mongoose.model('Book', BookSchema);
+module.exports = mongoose.model('Book', bookSchema);

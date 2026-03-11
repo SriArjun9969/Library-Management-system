@@ -1,13 +1,23 @@
-// routes/authRoutes.js
+// routes/authRoutes.js - Authentication API routes
 const express = require('express');
 const router = express.Router();
-const { register, login, getMe, updatePassword } = require('../controllers/authController');
+const {
+  register,
+  login,
+  getMe,
+  updateProfile,
+  changePassword,
+} = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
-const { validateRegister, validateLogin, handleValidationErrors } = require('../middleware/validate');
+const { validateRegister, validateLogin } = require('../middleware/validate');
 
-router.post('/register', validateRegister, handleValidationErrors, register);
-router.post('/login', validateLogin, handleValidationErrors, login);
+// Public routes
+router.post('/register', validateRegister, register);
+router.post('/login', validateLogin, login);
+
+// Protected routes (require JWT)
 router.get('/me', protect, getMe);
-router.put('/password', protect, updatePassword);
+router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 module.exports = router;

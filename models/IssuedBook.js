@@ -1,7 +1,7 @@
-// models/IssuedBook.js - Track issued books
+// models/IssuedBook.js - Tracks book issuance, returns, and fines
 const mongoose = require('mongoose');
 
-const IssuedBookSchema = new mongoose.Schema(
+const issuedBookSchema = new mongoose.Schema(
   {
     book: {
       type: mongoose.Schema.Types.ObjectId,
@@ -30,24 +30,29 @@ const IssuedBookSchema = new mongoose.Schema(
       default: 'issued',
     },
     fine: {
-      type: Number,
-      default: 0, // Fine amount calculated on return
-    },
-    finePaid: {
-      type: Boolean,
-      default: false,
+      amount: {
+        type: Number,
+        default: 0,
+      },
+      paid: {
+        type: Boolean,
+        default: false,
+      },
+      paidDate: {
+        type: Date,
+      },
     },
     issuedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Admin or librarian who issued the book
+      ref: 'User', // Admin or Librarian who issued the book
     },
-    returnedTo: {
+    returnedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Admin or librarian who accepted the return
+      ref: 'User', // Admin or Librarian who processed the return
     },
-    remarks: {
+    notes: {
       type: String,
-      trim: true,
+      maxlength: [500, 'Notes cannot exceed 500 characters'],
     },
   },
   {
@@ -55,23 +60,24 @@ const IssuedBookSchema = new mongoose.Schema(
   }
 );
 
-// Virtual: Check if book is overdue
-IssuedBookSchema.virtual('isOverdue').get(function () {
+// Virtual to check if overdue
+issuedBookSchema.virtual('isOverdue').get(function () {
   if (this.status === 'returned') return false;
   return new Date() > this.dueDate;
 });
 
-// Virtual: Calculate current fine
-IssuedBookSchema.virtual('currentFine').get(function () {
-  if (this.status === 'returned') return this.fine;
+// Virtual to calculate current fine
+issuedBookSchema.virtual('calculatedFine').get(function () {
+  if (this.status === 'returned') return this.fine.amount;
   if (!this.isOverdue) return 0;
   const finePerDay = parseInt(process.env.FINE_PER_DAY) || 5;
-  const overdueDays = Math.ceil((new Date() - this.dueDate) / (1000 * 60 * 60 * 24));
+  const overdueDays = Math.floor(
+    (new Date() - this.dueDate) / (1000 * 60 * 60 * 24)
+  );
   return overdueDays * finePerDay;
 });
 
-// Enable virtuals in JSON
-IssuedBookSchema.set('toJSON', { virtuals: true });
-IssuedBookSchema.set('toObject', { virtuals: true });
+issuedBookSchema.set('toJSON', { virtuals: true });
+issuedBookSchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.model('IssuedBook', IssuedBookSchema);
+module.exports = mongoose.model('IssuedBook', issuedBookSchema);
